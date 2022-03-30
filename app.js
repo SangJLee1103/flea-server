@@ -12,7 +12,7 @@ const passportConfig= require('./passport');
 const {sequelize} = require('./models');
 
 
-const memberRouter = require('./routes/member');
+const memberRouter = require('./api/member');
 
 
 
@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => { //에러 미들웨어, 매개변수가 4개!!!, 맨 마지막에 있는 것이 안정적이고 좋음
     console.error(err);
-    res.status(409).json({"message": err});
+    res.status(409).json({message : err});
 });
 
 app.listen(app.get('port'), () => console.log(app.get('port'), '번 포트에서 대기 중'));
