@@ -77,25 +77,32 @@ router.route('/join')
 router.route('/login')
     .post( async(req, res, next) => {
 
-        const id = req.body.id;
-        // const password = await bcrypt.compare(password,userWithId.password);
-        // console.log(password);
+        const { id, password } = req.body;
 
-        const userWithId = await User.findOne({where: {id}}).catch((err) => {
+        const loginUser = await User.findOne({where: {id}}).catch((err) => {
             console.log("Error: ", err);
         });
 
         //아이디 또는 비밀번호가 틀린 경우
-        if(!userWithId){
-            return res.status(401).json({message : "아이디 또는 비밀번호가 일치하지 않습니다."});
+        if(!loginUser){
+            return res.status(401).json({message : "존재하지 않는 계정입니다."});
         }
 
-        if(userWithId.password !== password){
-            return res.status(401).json({message : "아이디 또는 비밀번호가 일치하지 않습니다."});
+        const ValidPassword = await bcrypt.compare(password, loginUser.password);
+
+        if(!ValidPassword){
+            return res.status(401).json({message : "비밀번호가 일치하지 않습니다."});
         }
         
-        const jwtToken = jwt.sign({ id: userWithId.id }, process.env.JWT_SECRET );
-        res.json({message: "Welcome Back!", token: jwtToken});
+
+
+        const jwtToken = jwt.sign(
+            {
+                id: loginUser.id, 
+                exp: Math.floor(Date.now() / 1000) + 60 * 60, //access_token 1시간 유지
+            }, 
+            process.env.JWT_SECRET );
+        res.json({message: "환영합니다! " + loginUser.nickname + "님", token: jwtToken});
 
         // passport.authenticate('local', (authError, user, info) => {
         //     if (user) {

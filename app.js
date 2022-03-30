@@ -4,20 +4,18 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 
 
-const dotenv = require('dotenv');
-const passport = require('passport');
-const passportConfig= require('./passport');
+require('dotenv').config();
 // const path = require('path');
 
 const {sequelize} = require('./models');
-
-
 const memberRouter = require('./api/member');
+const passport = require('passport');
+const passportConfig= require('./passport');
+// passportConfig();
 
 
+require("./passport/local");
 
-dotenv.config();
-passportConfig();
 
 const app = express();
 
