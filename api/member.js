@@ -3,12 +3,11 @@ const express = require('express');
 const User = require('../models/user');
 const { isLoggedIn, isNotLoggedIn } = require('./checklogin');
 const { body } = require('express-validator');
-const { validatorErrorChecker } = require('../middleware/validator');
+const { validatorErrorChecker } = require('../middleware/validatorMiddleware');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-const { token } = require('morgan');
-
+const auth = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -127,31 +126,27 @@ router.get('/logout', (req, res, next) => {
 
 
 // 마이페이지
-router.route('/mypage')
-    .get ((req, res, next) => {
-        try {
-            res.locals.isAuthenticated = isLoggedIn; //로그인이 되었는지 안됬는지
-            res.locals.user = req.user;
-            res.render('mypage');
-        } catch (err) {
-            console.error(err);
-            next(err);
-        }
-    })
-    
-    .post ( async (req, res, next) => {
+router.route('/update')
+    .post ( auth, async(req, res, next) => {
         console.log(req.body);
         try {
             const hash = await bcrypt.hash(req.body.password, 12);
             const result = await User.update({
+                id: req.body.id,
                 password: hash,
-                name: req.body.name,
-                address: req.body.address
+                email: req.body.email,
+                phone: req.body.phone,
+                nickname: req.body.nickname,
+                address: req.body.address,
             }, {
                 where: { id: req.body.id }
             });
-            if (result) res.redirect('/');
-            else next('Not updated!')
+            if(result){
+                res.status(201).json({message : "수정 완료"});
+            }else{
+                res.status(401).json({message : "인증 되지 않은 사용자"});
+            }
+
         } catch (err) {
             console.error(err);
             next(err);

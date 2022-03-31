@@ -8,7 +8,7 @@ const User = require('../models/user');
 
 passport.use(
     new StrategyJwt({
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken, 
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), 
         secretOrKey: process.env.JWT_SECRET,
     }, 
     function (jwtPayload, done) {
@@ -34,7 +34,7 @@ passport.use(
 //             if(user){
 //                 const result = await bcrypt.compare(password, user.password);
 //                 if(result)
-//                     done(null, user);
+//                     done(null, {message: user.nickname+"님 환영합니다"});
 //                 else
 //                     done(null, false, {message: '비밀번호가 일치하지 않습니다.'});
 //             }else{

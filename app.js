@@ -5,16 +5,15 @@ const session = require('express-session');
 
 
 require('dotenv').config();
-// const path = require('path');
 
 const {sequelize} = require('./models');
-const memberRouter = require('./api/member');
 const passport = require('passport');
 const passportConfig= require('./passport');
 // passportConfig();
 
-
 require("./passport/local");
+
+const memberRouter = require('./api/member');
 
 
 const app = express();
