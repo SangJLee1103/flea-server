@@ -1,7 +1,6 @@
 const express = require('express');
 
 const User = require('../models/user');
-const { isLoggedIn, isNotLoggedIn } = require('./checklogin');
 const { body } = require('express-validator');
 const { validatorErrorChecker } = require('../middleware/validatorMiddleware');
 const bcrypt = require('bcrypt');
@@ -14,6 +13,7 @@ const router = express.Router();
 //회원가입
 router.route('/join')
     .post(
+        // 회원가입 데이터 유효성 검증
         body("id").matches(/^[a-z]+[a-z0-9]{5,19}$/).withMessage("아이디는 최소 6자리 최대 20자리입니다."),
         body("password").matches(/^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/).withMessage("비밀번호는 8~ 20 자리이고 대소문자 또는 특수기호를 최소 1자 이상 사용해야 합니다."),
         body("email").isEmail().withMessage("이메일 형식이어야 합니다."),
@@ -26,8 +26,7 @@ router.route('/join')
             const userData = req.body;
             console.log(userData);
             
-            
-            //중복 체크
+            //회원 중복 체크
             const userIdDuplication = await User.findOne({ where: { id: req.body.id }});
             if (userIdDuplication) {
                 next('이미 등록된 아이디입니다.');
@@ -51,7 +50,6 @@ router.route('/join')
                 next('이미 등록된 닉네임입니다.');
                 return;
             }
-
 
             try {
                 const hash = await bcrypt.hash(req.body.password, 12);
@@ -95,13 +93,26 @@ router.route('/login')
         
 
 
-        const jwtToken = jwt.sign(
+        //토큰 서명 부분
+        const accessToken = jwt.sign(
             {
                 id: loginUser.id, 
-                exp: Math.floor(Date.now() / 1000) + 60 * 60, //access_token 1시간 유지
+                exp: Math.floor(Date.now() / 1000) + 60 * 60, //access_token 1시간
             }, 
-            process.env.JWT_SECRET );
-        res.json({message: "환영합니다! " + loginUser.nickname + "님", token: jwtToken});
+            process.env.JWT_ACCESS_SECRET 
+        );
+        
+        const refreshToken = jwt.sign(
+            {
+                id: loginUser.id, 
+                exp: Math.floor(Date.now() / 1000) + 86400 * 180, //refresh_token 6개월
+            }, 
+            process.env.JWT_REFRESH_SECRET 
+        );
+        
+        //로그인 성공시 응답객체
+        res.json({message: "환영합니다! " + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});
+
 
         // passport.authenticate('local', (authError, user, info) => {
         //     if (user) {
@@ -125,7 +136,7 @@ router.get('/logout', (req, res, next) => {
 })
 
 
-// 마이페이지
+// 회원정보 수정
 router.route('/update')
     .post ( auth, async(req, res, next) => {
         console.log(req.body);
@@ -141,6 +152,7 @@ router.route('/update')
             }, {
                 where: { id: req.body.id }
             });
+
             if(result){
                 res.status(201).json({message : "수정 완료"});
             }else{
