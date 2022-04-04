@@ -4,9 +4,17 @@ module.exports = class Board extends Sequelize.Model {
     static init(sequelize){
         return super.init({
             start: {
-                type: Sequelize.STRING(30)
+                type: Sequelize.STRING(30),
+                allowNull: false
             },
-
+            topic: {
+                type: Sequelize.STRING(100),
+                allowNull: false
+            },
+            description: {
+                type: Sequelize.STRING(400),
+                allowNull: false
+            },
             nickname: {
                 type: Sequelize.STRING(30),
                 allowNull: false,
@@ -20,7 +28,7 @@ module.exports = class Board extends Sequelize.Model {
             sequelize,
             timestamps: false,
             paranode: false,
-            underscored: false,
+            underscored: true,
             modelName: 'Board',
             tableName: 'BOARD',
             paranoid: false,
@@ -28,7 +36,8 @@ module.exports = class Board extends Sequelize.Model {
             collate: 'utf8mb4_general_ci'
         });
     }
-    // static associate(db){
-    //     db.User.hasMany(db.Pet, {foreignKey: 'userId', sourceKey: 'id', onDelete: 'cascade'});
-    // }
+    static associate(db) {
+        db.Board.hasMany(db.Product, {foreignKey: 'board_id', sourceKey: 'id', onDelete: 'cascade'});
+        db.Board.belongsTo(db.User, { foreignKey: 'nickname', targetKey: 'nickname' });
+    }
 };

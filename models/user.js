@@ -38,7 +38,7 @@ module.exports = class User extends Sequelize.Model {
             sequelize,
             timestamps: false,
             paranode: false,
-            underscored: false,
+            underscored: true,
             modelName: 'User',
             tableName: 'USER',
             paranoid: false,
@@ -46,9 +46,10 @@ module.exports = class User extends Sequelize.Model {
             collate: 'utf8mb4_general_ci'
         });
     }
-    // static associate(db){
-    //     db.User.hasMany(db.Pet, {foreignKey: 'userId', sourceKey: 'id', onDelete: 'cascade'});
-    // }
+    static associate(db){
+        db.User.hasMany(db.Board, {foreignKey: 'nickname', sourceKey: 'nickname', onDelete: 'cascade'});
+        db.User.hasMany(db.Product, {foreignKey: 'nickname', sourceKey: 'nickname', onDelete: 'cascade'});
+    }
 };
 
 

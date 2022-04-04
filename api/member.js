@@ -61,7 +61,7 @@ router.route('/join')
                     nickname: req.body.nickname,
                     address: req.body.address,
                 });
-                res.status(201).json({message : "회원가입이 완료되었습니다"});
+                res.status(201).json({message : "회원가입이 완료되었습니다😁"});
             } catch (err) {
                 console.log(err);
                 next(err);
@@ -111,7 +111,7 @@ router.route('/login')
         );
         
         //로그인 성공시 응답객체
-        res.json({message: "환영합니다! " + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});
+        res.json({message: "환영합니다!😁 " + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});
 
 
         // passport.authenticate('local', (authError, user, info) => {
