@@ -14,6 +14,7 @@ const passportConfig= require('./passport');
 require("./passport/local");
 
 const memberRouter = require('./api/member');
+const boardRouter = require('./api/board');
 
 
 const app = express();
@@ -44,21 +45,19 @@ app.use(
     passport.session()
 );
 
-
 app.use('/member', memberRouter);
-
+app.use('/board', boardRouter);
 
 app.use((req, res, next) => {
     console.log('404');
     const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
     error.status = 404;
-    next(error);
+    next();
 });
 
-
-app.use((err, req, res, next) => { //에러 미들웨어, 매개변수가 4개!!!, 맨 마지막에 있는 것이 안정적이고 좋음
+app.use((err, req, res, next) => { //에러 처리 미들웨어, 매개변수가 4개!!!, 맨 마지막에 있는 것이 안정적이고 좋음
     console.error(err);
-    res.status(409).json({message : err});
+    res.status(409).json({error : err});
 });
 
 app.listen(app.get('port'), () => console.log(app.get('port'), '번 포트에서 대기 중'));

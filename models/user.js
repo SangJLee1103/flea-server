@@ -33,7 +33,7 @@ module.exports = class User extends Sequelize.Model {
             address: {
                 type: Sequelize.STRING(50),
                 allowNull: false
-            }
+            },
         },{
             sequelize,
             timestamps: false,

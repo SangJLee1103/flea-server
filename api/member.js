@@ -1,6 +1,7 @@
 const express = require('express');
 
 const User = require('../models/user');
+const Board = require('../models/board');
 const { body } = require('express-validator');
 const { validatorErrorChecker } = require('../middleware/validatorMiddleware');
 const bcrypt = require('bcrypt');
@@ -12,8 +13,7 @@ const { count } = require('../models/user');
 const router = express.Router();
 
 //회원가입
-router.route('/join')
-    .post(
+router.post('/join',
         // 회원가입 데이터 유효성 검증
         body("id").matches(/^[a-z]+[a-z0-9]{5,19}$/).withMessage("아이디는 최소 6자리 최대 20자리입니다."),
         body("password").matches(/^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/).withMessage("비밀번호는 8~ 20 자리이고 대소문자 또는 특수기호를 최소 1자 이상 사용해야 합니다."),
@@ -23,9 +23,6 @@ router.route('/join')
         body("address").isLength({min: 2, max: 50}).withMessage("주소를 간단하게라도 입력해주세요.(ex.서울특별시 강남구)"),
         validatorErrorChecker, 
         async (req, res, next) => {
-            const userData = req.body;
-            console.log(userData);
-            
             //회원 중복 체크
             const userIdDuplication = await User.findOne({ where: { id: req.body.id }});
             if (userIdDuplication) {
@@ -68,12 +65,8 @@ router.route('/join')
             }
     });
 
-
-
 //로그인   
-router.route('/login')
-    .post( async(req, res, next) => {
-
+router.post('/login', async(req, res, next) => {
         const { id, password } = req.body;
 
         const loginUser = await User.findOne({where: {id}}).catch((err) => {
@@ -91,8 +84,6 @@ router.route('/login')
             return res.status(401).json({message : "비밀번호가 일치하지 않습니다."});
         }
         
-
-
         //토큰 서명 부분
         const accessToken = jwt.sign(
             {
@@ -107,38 +98,46 @@ router.route('/login')
                 id: loginUser.id, 
                 exp: Math.floor(Date.now() / 1000) + 86400 * 180, //refresh_token 6개월
             }, 
-            process.env.JWT_REFRESH_SECRET 
+            process.env.JWT_REFRESH_SECRET
         );
         
+        
         //로그인 성공시 응답객체
-        res.json({message: "환영합니다!😁 " + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});
+        res.json({message: "환영합니다! 😁" + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});;
+    }
+);
 
+// //로그아웃
+// router.get('/logout', (req, res, next) => {  
+//     try{
+//         req.logout();
+//         req.session.destroy();
+//         res.redirect('/');
+//     }catch(err){
+//         console.log(err);
+//         next(err);
+//     }
+// });
 
-        // passport.authenticate('local', (authError, user, info) => {
-        //     if (user) {
-        //         req.login(user, loginError => res.redirect('/'));
-        //         res.locals.isAuthenticated = isLoggedIn;
-        //     }
-        //     else res.send(`${info.message}`);
-        // })(req, res, next);
-    });
-
-//로그아웃
-router.get('/logout', (req, res, next) => {  
-    try{
-        req.logout();
-        req.session.destroy();
-        res.redirect('/');
-    }catch(err){
+//회원 정보 불러오기
+router.get('/info', auth, async(req, res, next) => {
+    try {
+        const userInfo = await User.findAll({
+            where: {id: req.user},
+            include: {
+                model: Board
+            }
+        });
+    res.status(200).json({list: userInfo});    
+    } catch (err) {
         console.log(err);
         next(err);
+    }    
     }
-})
-
+);
 
 // 회원정보 수정
-router.route('/update')
-    .put ( auth, 
+router.put('/update', auth, 
     body("id").matches(/^[a-z]+[a-z0-9]{5,19}$/).withMessage("아이디는 최소 6자리 최대 20자리입니다."),
     body("password").matches(/^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/).withMessage("비밀번호는 8~ 20 자리이고 대소문자 또는 특수기호를 최소 1자 이상 사용해야 합니다."),
     body("email").isEmail().withMessage("이메일 형식이어야 합니다."),
@@ -146,12 +145,6 @@ router.route('/update')
     body("nickname").isLength({min: 1, max: 30}).withMessage("닉네임은 15자리 이하입니다."),
     body("address").isLength({min: 2, max: 50}).withMessage("주소를 간단하게라도 입력해주세요.(ex.서울특별시 강남구)"),
     validatorErrorChecker, async(req, res, next) => {
-        //회원 중복 체크
-        // const userIdDuplication = await User.findAll({ where: { id: req.body.id }});
-        // if (count(userIdDuplication) == 2) {
-        //     next('이미 등록된 아이디입니다.');
-        //     return;
-        // }
         const userEmailDuplication = await User.findAll({ where: { email: req.body.email }});
         if (count(userEmailDuplication) == 2) {
             next('이미 등록된 메일입니다.');
@@ -191,7 +184,7 @@ router.route('/update')
             console.error(err);
             next(err);
         }
-    });
-
+    }
+);
 
 module.exports = router;
