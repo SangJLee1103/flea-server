@@ -3,7 +3,6 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 
-
 require('dotenv').config();
 
 const {sequelize} = require('./models');
@@ -15,12 +14,11 @@ require("./passport/local");
 
 const memberRouter = require('./api/member');
 const boardRouter = require('./api/board');
+const productRouter = require('./api/product');
 
 
 const app = express();
-
 app.set('port', process.env.PORT || 3000);
-
 
 sequelize.sync({ force: false })
     .then(() => console.log("DB 연결 성공"))
@@ -47,6 +45,7 @@ app.use(
 
 app.use('/member', memberRouter);
 app.use('/board', boardRouter);
+app.use('/product', productRouter);
 
 app.use((req, res, next) => {
     console.log('404');

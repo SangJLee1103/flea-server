@@ -75,13 +75,13 @@ router.post('/login', async(req, res, next) => {
 
         //아이디 또는 비밀번호가 틀린 경우
         if(!loginUser){
-            return res.status(401).json({message : "존재하지 않는 계정입니다."});
+            return res.status(401).json({message : "존재하지 않는 계정입니다.❌"});
         }
 
         const ValidPassword = await bcrypt.compare(password, loginUser.password);
 
         if(!ValidPassword){
-            return res.status(401).json({message : "비밀번호가 일치하지 않습니다."});
+            return res.status(401).json({message : "비밀번호가 일치하지 않습니다.😰"});
         }
         
         //토큰 서명 부분
