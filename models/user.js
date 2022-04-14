@@ -4,21 +4,16 @@ module.exports = class User extends Sequelize.Model {
     static init(sequelize){
         return super.init({
             id: {
-                type: Sequelize.STRING(20),
+                type: Sequelize.STRING(40),
                 allowNull: false,
-                primaryKey: true
+                primaryKey: true,
+                validate:{
+                    isEmail: true
+                },
             },
             password: {
                 type: Sequelize.STRING(100),
                 allowNull: false,
-            },
-            email:{
-                type: Sequelize.STRING(50),
-                allowNull: false,
-                validate:{
-                    isEmail: true
-                },
-                uniqueKey: true
             },
             phone:{
                 type: Sequelize.STRING(15),
@@ -29,10 +24,6 @@ module.exports = class User extends Sequelize.Model {
                 type: Sequelize.STRING(30),
                 allowNull: false,
                 uniqueKey: true
-            },
-            address: {
-                type: Sequelize.STRING(50),
-                allowNull: false
             },
         },{
             sequelize,

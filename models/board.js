@@ -38,6 +38,6 @@ module.exports = class Board extends Sequelize.Model {
     }
     static associate(db) {
         db.Board.hasMany(db.Product, {foreignKey: 'board_id', sourceKey: 'id', onDelete: 'cascade'});
-        db.Board.belongsTo(db.User, { foreignKey: 'nickname', targetKey: 'nickname' });
+        db.Board.belongsTo(db.User, { throuth:'nickname', foreignKey: 'nickname', targetKey: 'nickname', });
     }
 };

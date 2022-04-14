@@ -39,6 +39,10 @@ module.exports = class Product extends Sequelize.Model {
             nickname: {
                 type: Sequelize.STRING(30),
                 allowNull: false
+            },
+            img: {
+                type: Sequelize.STRING(400),
+                allowNull: false
             }
 
         },{
@@ -56,7 +60,6 @@ module.exports = class Product extends Sequelize.Model {
     static associate(db){
         db.Product.belongsTo(db.User, {foreignKey: 'nickname', targetKey: 'nickname'});
         db.Product.belongsTo(db.Board, {foreignKey: 'board_id', targetKey: 'id'});
-        db.Product.hasMany(db.Product_Image, {foreignKey: 'product_id', sourceKey: 'id', onDelete: 'cascade'});
     }
 };
 
