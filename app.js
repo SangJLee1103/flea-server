@@ -6,11 +6,11 @@ const session = require('express-session');
 require('dotenv').config();
 
 const {sequelize} = require('./models');
-const passport = require('passport');
-const passportConfig= require('./passport');
+// const passport = require('passport');
+// const passportConfig= require('./passport');
 // passportConfig();
 
-require("./passport/local");
+// require("./passport/local");
 
 const memberRouter = require('./api/member');
 const boardRouter = require('./api/board');
@@ -39,8 +39,8 @@ app.use(
         },
         name: 'session-cookie'
     }),
-    passport.initialize(),
-    passport.session()
+    // passport.initialize(),
+    // passport.session()
 );
 
 app.use('/member', memberRouter);
@@ -56,7 +56,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => { //에러 처리 미들웨어, 매개변수가 4개!!!, 맨 마지막에 있는 것이 안정적이고 좋음
     console.error(err);
-    res.status(409).json({error : err});
+    res.status(403).json({message : err});
 });
 
 app.listen(app.get('port'), () => console.log(app.get('port'), '번 포트에서 대기 중'));

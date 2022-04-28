@@ -4,7 +4,7 @@ module.exports = class Board extends Sequelize.Model {
     static init(sequelize){
         return super.init({
             start: {
-                type: Sequelize.STRING(20),
+                type: Sequelize.STRING(30),
                 allowNull: false,
             },
             topic: {
@@ -15,10 +15,9 @@ module.exports = class Board extends Sequelize.Model {
                 type: Sequelize.STRING(400),
                 allowNull: false
             },
-            nickname: {
-                type: Sequelize.STRING(30),
+            user_id: {
+                type: Sequelize.STRING(40),
                 allowNull: false,
-                uniqueKey: true
             },
             password: {
                 type: Sequelize.STRING(100),
@@ -38,6 +37,6 @@ module.exports = class Board extends Sequelize.Model {
     }
     static associate(db) {
         db.Board.hasMany(db.Product, {foreignKey: 'board_id', sourceKey: 'id', onDelete: 'cascade'});
-        db.Board.belongsTo(db.User, { throuth:'nickname', foreignKey: 'nickname', targetKey: 'nickname', });
+        db.Board.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id', });
     }
 };

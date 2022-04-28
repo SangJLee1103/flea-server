@@ -16,8 +16,8 @@ const router = express.Router();
 router.post('/join',
         // 회원가입 데이터 유효성 검증
         body("id").trim().notEmpty().withMessage("공백불가!").isEmail().withMessage("이메일 형식이어야 합니다.").isLength({min:10, max:40}).withMessage("10자 이상 40자 이하로 입력해주세요."),
-        body("password").trim().notEmpty().withMessage("공백불가!").matches(/^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/).withMessage("비밀번호는 8~ 20 자리이고 대소문자 또는 특수기호를 최소 1자 이상 사용해야 합니다."),
-        body("phone").trim().notEmpty().withMessage("공백불가!").isMobilePhone().matches(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/).withMessage("휴대폰 번호 형식이어야합니다."),
+        body("password").trim().notEmpty().withMessage("공백불가!").matches(/^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/).withMessage("8~20 자리이고 대소문자 또는 특수기호를 최소 1자 이상 사용해주세요."),
+        body("phone").trim().notEmpty().withMessage("공백불가!").isMobilePhone().withMessage("휴대폰 번호 형식이어야합니다.").matches(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/).withMessage("휴대폰 번호 형식이어야합니다."),
         body("nickname").trim().notEmpty().withMessage("공백불가!").isLength({min: 1, max: 30}).withMessage("닉네임은 15자리 이하입니다."),
         validatorErrorChecker, 
         async (req, res, next) => {
@@ -28,17 +28,18 @@ router.post('/join',
                 return;
             }
 
+            const userNicknameDuplication = await User.findOne({ where: { nickname: req.body.nickname }});
+            if (userNicknameDuplication) {
+                next('이미 등록된 닉네임입니다.');
+                return;
+            } 
+            
             const userPhoneDuplication = await User.findOne({ where: { phone: req.body.phone }});
             if (userPhoneDuplication) {
                 next('이미 등록된 휴대폰 번호입니다.');
                 return;
             }
 
-            const userNicknameDuplication = await User.findOne({ where: { nickname: req.body.nickname }});
-            if (userNicknameDuplication) {
-                next('이미 등록된 닉네임입니다.');
-                return;
-            }
 
             try {
                 const hash = await bcrypt.hash(req.body.password, 12);
@@ -93,7 +94,7 @@ router.post('/login', async(req, res, next) => {
         
         
         //로그인 성공시 응답객체
-        res.json({message: "환영합니다! 😁" + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});;
+        res.status(200).json({message: "환영합니다! 😁" + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});;
     }
 );
 
@@ -132,19 +133,19 @@ router.put('/update', auth,
     body("phone").trim().notEmpty().withMessage("공백불가!").isMobilePhone().matches(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/).withMessage("휴대폰 번호 형식이어야합니다."),
     body("nickname").trim().notEmpty().withMessage("공백불가!").isLength({min: 1, max: 30}).withMessage("닉네임은 15자리 이하입니다."),
     validatorErrorChecker, async(req, res, next) => {  
-        const userPhoneDuplication = await User.findAll({ where: { phone: req.body.phone }});
-        if (count(userPhoneDuplication) == 2) {
-            next('이미 등록된 휴대폰 번호입니다.');
-            return;
-        }
-
-        const userNicknameDuplication = await User.findAll({ where: { nickname: req.body.nickname }});
-        if (count(userNicknameDuplication) == 2) {
-            next('이미 등록된 닉네임입니다.');
-            return;
-        }
-
         try {
+            const userPhoneDuplication = await User.findAll({ where: { phone: req.body.phone }});
+            if (count(userPhoneDuplication) == 2) {
+                next('이미 등록된 휴대폰 번호입니다.');
+                return;
+            }
+    
+            const userNicknameDuplication = await User.findAll({ where: { nickname: req.body.nickname }});
+            if (count(userNicknameDuplication) == 2) {
+                next('이미 등록된 닉네임입니다.');
+                return;
+            }
+
             const hash = await bcrypt.hash(req.body.password, 12);
             const result = await User.update({
                 password: hash,

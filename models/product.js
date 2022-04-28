@@ -36,7 +36,7 @@ module.exports = class Product extends Sequelize.Model {
                 type: Sequelize.INTEGER,
                 allowNull: false
             },
-            nickname: {
+            user_id: {
                 type: Sequelize.STRING(30),
                 allowNull: false
             },
@@ -58,7 +58,7 @@ module.exports = class Product extends Sequelize.Model {
         });
     }
     static associate(db){
-        db.Product.belongsTo(db.User, {foreignKey: 'nickname', targetKey: 'nickname'});
+        db.Product.belongsTo(db.User, {foreignKey: 'user_id', targetKey: 'id'});
         db.Product.belongsTo(db.Board, {foreignKey: 'board_id', targetKey: 'id'});
     }
 };
