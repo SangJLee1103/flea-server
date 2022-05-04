@@ -41,7 +41,7 @@ module.exports = class Product extends Sequelize.Model {
                 allowNull: false
             },
             img: {
-                type: Sequelize.STRING(400),
+                type: Sequelize.STRING(500),
                 allowNull: false
             }
 

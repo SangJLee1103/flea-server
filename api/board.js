@@ -2,6 +2,7 @@ const express = require('express');
 
 const User = require('../models/user');
 const Board = require('../models/board');
+const Product = require('../models/product');
 const { body } = require('express-validator');
 const { validatorErrorChecker } = require('../middleware/validatorMiddleware');
 const auth = require('../middleware/authMiddleware');
@@ -46,7 +47,11 @@ router.route('/:user_id/:id')
         async (req, res, next) => {
             try {
                 const user = await User.findOne({ where: { id: req.user } }); //로그인 한 회원 찾기
-                const findBoard = await Board.findOne({ where: { user_id: user.id, id: req.params.id } });
+                const findBoard = await Board.findOne(
+                    {
+                        where: { user_id: user.id, id: req.params.id }
+                    }
+                );
                 console.log(findBoard);
                 res.status(200).json({ find: findBoard, nickname: user.nickname });
             } catch (err) {
