@@ -125,7 +125,7 @@ router.route('/:board_id/:user_id/:id')
 router.get('/:board_id', auth, async(req, res, next) => {
     try{
         const product = await Product.findAll({ 
-            where: { board_id: req.params.board_id }, 
+            where: { board_id: req.params.board_id }
         });
         res.status(200).json({ data: product });
     } catch (err) {
@@ -133,5 +133,21 @@ router.get('/:board_id', auth, async(req, res, next) => {
         next(err);
     }
 }) 
+
+//하나의 게시글에 있는 상품을 좋아요 순서대로 10개까지만 조회(랭킹 기능)
+router.get('/:board_id/popular', auth, async(req, res, next) => {
+    try{
+        const product = await Product.findAll({ 
+            where: { board_id: req.params.board_id }, 
+            order: ['like_count'],
+            limit: 10
+        });
+        res.status(200).json({ data: product });
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+})
+
 
 module.exports = router;
