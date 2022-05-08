@@ -124,10 +124,10 @@ router.route('/:board_id/:user_id/:id')
 //하나의 게시글에 있는 모든 상품 조회 API
 router.get('/:board_id', auth, async(req, res, next) => {
     try{
-        const board = await Board.findOne({ where: { id: req.params.board_id } });
-        const productAll = await Product.findAll({ where: {board_id: board.id} });
-
-        res.status(200).json({message: productAll});
+        const product = await Product.findAll({ 
+            where: { board_id: req.params.board_id }, 
+        });
+        res.status(200).json({ data: product });
     } catch (err) {
         console.log(err);
         next(err);
