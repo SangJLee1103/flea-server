@@ -7,7 +7,6 @@ const { body } = require('express-validator');
 const { validatorErrorChecker } = require('../middleware/validatorMiddleware');
 const auth = require('../middleware/authMiddleware');
 
-
 const router = express.Router();
 
 //게시글 작성 API
@@ -103,12 +102,11 @@ router.route('/:user_id/:id')
         }
     );
 
-
 //게시글 전체 조회
 router.route("/read-all")
     .get(auth, 
         async (_, res, next) => {
-            try{
+            try {
                 const boardAll = await Board.findAll({
                     include: {
                         model: User,
@@ -116,12 +114,11 @@ router.route("/read-all")
                     }
                 });
                 res.status(200).json({data: boardAll});
-            }catch(err){
+            }catch (err){
                 console.log(err);
                 next(err);
             }
         })
-
 
 
 module.exports = router;

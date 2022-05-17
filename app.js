@@ -43,6 +43,7 @@ app.use(
     // passport.session()
 );
 
+app.use('/uploads', express.static('uploads'));
 app.use('/member', memberRouter);
 app.use('/board', boardRouter);
 app.use('/product', productRouter);

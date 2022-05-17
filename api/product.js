@@ -9,7 +9,9 @@ const Product = require('../models/product');
 const auth = require('../middleware/authMiddleware');
 
 const router = express.Router();
-fs.readdir('uploads', (error) => {
+
+
+fs.readdir('uploads', error => {
     if (error) {
         console.error('폴더 생성')
         fs.mkdirSync('uploads') //폴더 생성
@@ -59,17 +61,15 @@ router.post('/:id/register', auth, upload.array('img', 5),
 )
 
 //상품 수정, 삭제, 조회 API
-router.route('/:board_id/:user_id/:id')
+router.route('/:id')
     .put(auth, upload.array('img', 5),
         async (req, res, next) => {
             try {
-                const board = await Board.findOne({ where: { id: req.params.board_id } });
-                const user = await User.findOne({ where: { id: req.user } }); //로그인 한 회원 찾기
                 const product = await Product.findOne({ where: { id: req.params.id } });
 
                 const image = req.files;
                 const path = image.map(img => img.path);
-                const toModifiedProduct = await Product.findOne({ where: { board_id: board.id, user_id: user.id, id: product.id } });
+                const toModifiedProduct = await Product.findOne({ where: { id: product.id } });
 
                 await toModifiedProduct.update({
                     name: req.body.name,
@@ -77,8 +77,6 @@ router.route('/:board_id/:user_id/:id')
                     selling_price: req.body.selling_price,
                     like_count: 0,
                     description: req.body.description,
-                    board_id: board.id,
-                    user_id: user.id,
                     img: path.toString() //이미지 경로 배열을 문자열로 변환
                 });
                 res.status(201).json({ message: "상품 정보가 수정되었습니다.🔄" });
@@ -91,10 +89,8 @@ router.route('/:board_id/:user_id/:id')
     .delete(auth,
         async (req, res, next) => {
             try {
-                const board = await Board.findOne({ where: { id: req.params.board_id } });
-                const user = await User.findOne({ where: { id: req.user } }); //로그인 한 회원 찾기
                 const product = await Product.findOne({ where: { id: req.params.id } });
-                const toDeletedProduct = await Product.findOne({ where: { board_id: board.id, user_id: user.id, id: product.id } });
+                const toDeletedProduct = await Product.findOne({ where: { id: product.id } });
 
                 await toDeletedProduct.destroy();
                 res.status(200).json({ message: "상품이 삭제되었습니다.🚮" });
@@ -108,10 +104,7 @@ router.route('/:board_id/:user_id/:id')
     .get(auth,
         async (req, res, next) => {
             try {
-                const board = await Board.findOne({ where: { id: req.params.board_id } });
-                const user = await User.findOne({ where: { id: req.user } }); //로그인 한 회원 찾기
-                const product = await Product.findOne({ where: { id: req.params.id } });
-                const toFindProduct = await Product.findOne({ where: { board_id: board.id, user_id: user.id, id: product.id } });
+                const toFindProduct = await Product.findOne({ where: { id: req.params.id } });
                 
                 res.status(200).json({ message: toFindProduct });
             } catch (err) {
@@ -122,10 +115,14 @@ router.route('/:board_id/:user_id/:id')
     )
 
 //하나의 게시글에 있는 모든 상품 조회 API
-router.get('/:board_id', auth, async(req, res, next) => {
+router.get('/:board_id/all', auth, async(req, res, next) => {
     try{
         const product = await Product.findAll({ 
-            where: { board_id: req.params.board_id }
+            where: { board_id: req.params.board_id },
+            include: {
+                model: User,
+                attributes: ['nickname']
+            }
         });
         res.status(200).json({ data: product });
     } catch (err) {
@@ -134,14 +131,23 @@ router.get('/:board_id', auth, async(req, res, next) => {
     }
 }) 
 
-//하나의 게시글에 있는 상품을 좋아요 순서대로 10개까지만 조회(랭킹 기능)
+//하나의 게시글에 있는 상품을 좋아요 순서대로 10개까지 조회하는 API(랭킹 기능)
 router.get('/:board_id/popular', auth, async(req, res, next) => {
     try{
         const product = await Product.findAll({ 
             where: { board_id: req.params.board_id }, 
             order: ['like_count'],
-            limit: 10
+            limit: 10,
+            include: {
+                model: User,
+                attributes: ['nickname']
+            }
         });
+        
+        // var imgPath = []
+        // product.forEach( e=> {
+        //     imgPath.push((e.img).split(','));
+        // })
         res.status(200).json({ data: product });
     } catch (err) {
         console.log(err);
