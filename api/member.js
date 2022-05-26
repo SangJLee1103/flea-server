@@ -78,7 +78,7 @@ router.post('/login', async(req, res, next) => {
         const accessToken = jwt.sign(
             {
                 id: loginUser.id, 
-                exp: Math.floor(Date.now() / 1000) + 60 * 60, //access_token 1시간
+                exp: Math.floor(Date.now() / 1000) + 60 * 360, //access_token 1시간
             }, 
             process.env.JWT_ACCESS_SECRET 
         );

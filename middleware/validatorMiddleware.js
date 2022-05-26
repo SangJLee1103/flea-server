@@ -8,5 +8,3 @@ exports.validatorErrorChecker = (req, res, next) => {
   }
   next();
 }
-
-Array.prototype.f

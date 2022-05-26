@@ -21,13 +21,6 @@ module.exports = class Product extends Sequelize.Model {
                     isInt: true
                 },
             },
-            like_count: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
-                validate:{
-                    isInt: true
-                },
-            },
             description: {
                 type: Sequelize.STRING(400),
                 allowNull: false
@@ -58,6 +51,7 @@ module.exports = class Product extends Sequelize.Model {
         });
     }
     static associate(db){
+        db.Product.hasMany(db.Likes, {foreignKey: 'product_id', sourceKey: 'id', onDelete: 'cascade'})
         db.Product.belongsTo(db.User, {foreignKey: 'user_id', targetKey: 'id'});
         db.Product.belongsTo(db.Board, {foreignKey: 'board_id', targetKey: 'id'});
     }

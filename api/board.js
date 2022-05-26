@@ -2,7 +2,6 @@ const express = require('express');
 
 const User = require('../models/user');
 const Board = require('../models/board');
-const Product = require('../models/product');
 const { body } = require('express-validator');
 const { validatorErrorChecker } = require('../middleware/validatorMiddleware');
 const auth = require('../middleware/authMiddleware');

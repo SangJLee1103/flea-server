@@ -38,6 +38,7 @@ module.exports = class User extends Sequelize.Model {
         });
     }
     static associate(db){
+        // db.User.hasMany(db.Likes);
         db.User.hasMany(db.Board, {foreignKey: 'user_id', sourceKey: 'id', onDelete: 'cascade'});
         db.User.hasMany(db.Product, {foreignKey: 'user_id', sourceKey: 'id', onDelete: 'cascade'});
     }

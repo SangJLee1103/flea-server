@@ -7,6 +7,8 @@ const User = require('../models/user');
 const Board = require('../models/board');
 const Product = require('../models/product');
 const auth = require('../middleware/authMiddleware');
+const Likes = require('../models/likes');
+const { sequelize } = require('../models/product');
 
 const router = express.Router();
 
@@ -29,7 +31,7 @@ const upload = multer({
             cb(null, path.basename(file.originalname, ext) + Date.now() + ext);
         },
     }),
-    limits: { fileSize: 10 * 1024 * 1024 }, 
+    limits: { fileSize: 10 * 1024 * 1024 },
 });
 
 
@@ -46,7 +48,6 @@ router.post('/:id/register', auth, upload.array('img', 5),
                 name: req.body.name,
                 cost_price: req.body.cost_price,
                 selling_price: req.body.selling_price,
-                like_count: 0,
                 description: req.body.description,
                 board_id: board.id,
                 user_id: user.id,
@@ -57,8 +58,7 @@ router.post('/:id/register', auth, upload.array('img', 5),
             console.log(err);
             next(err);
         }
-    }
-)
+    });
 
 //상품 수정, 삭제, 조회 API
 router.route('/:id')
@@ -105,19 +105,19 @@ router.route('/:id')
         async (req, res, next) => {
             try {
                 const toFindProduct = await Product.findOne({ where: { id: req.params.id } });
-                
+
                 res.status(200).json({ message: toFindProduct });
             } catch (err) {
                 console.log(err);
                 next(err);
             }
         }
-    )
+    );
 
 //하나의 게시글에 있는 모든 상품 조회 API
-router.get('/:board_id/all', auth, async(req, res, next) => {
-    try{
-        const product = await Product.findAll({ 
+router.get('/:board_id/all', auth, async (req, res, next) => {
+    try {
+        const product = await Product.findAll({
             where: { board_id: req.params.board_id },
             include: {
                 model: User,
@@ -129,31 +129,35 @@ router.get('/:board_id/all', auth, async(req, res, next) => {
         console.log(err);
         next(err);
     }
-}) 
+});
 
 //하나의 게시글에 있는 상품을 좋아요 순서대로 10개까지 조회하는 API(랭킹 기능)
-router.get('/:board_id/popular', auth, async(req, res, next) => {
-    try{
-        const product = await Product.findAll({ 
-            where: { board_id: req.params.board_id }, 
-            order: ['like_count'],
-            limit: 10,
+router.get('/:board_id/popular', async (req, res, next) => {
+    try {
+        const product = await Product.findAll({
+            where: { board_id: req.params.board_id },
             include: {
-                model: User,
-                attributes: ['nickname']
-            }
+                model: Likes,
+                attributes: [
+                    'Likes.product_id',
+                    [
+                        sequelize.literal(
+                            '(SELECT COUNT(*) FROM Likes WHERE Likes.user_id = Product.name)'
+                        ),
+                        'LikesCount'
+                    ]
+                ],
+            },
+            order: [
+                [sequelize.literal('LikesCount'), 'DESC']
+            ],
+            limit: 10
         });
-        
-        // var imgPath = []
-        // product.forEach( e=> {
-        //     imgPath.push((e.img).split(','));
-        // })
-        res.status(200).json({ data: product });
+        res.json({product});
     } catch (err) {
         console.log(err);
         next(err);
     }
-})
-
+});
 
 module.exports = router;

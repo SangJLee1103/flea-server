@@ -15,6 +15,7 @@ const {sequelize} = require('./models');
 const memberRouter = require('./api/member');
 const boardRouter = require('./api/board');
 const productRouter = require('./api/product');
+const likesRouter = require('./api/likes');
 
 
 const app = express();
@@ -47,6 +48,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/member', memberRouter);
 app.use('/board', boardRouter);
 app.use('/product', productRouter);
+app.use('/likes', likesRouter);
 
 app.use((req, res, next) => {
     console.log('404');
