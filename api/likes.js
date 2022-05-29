@@ -31,7 +31,7 @@ router.route("/:id/count")
                     user_id: user.id,
                     product_id: product.id
                 });
-                res.status(200).json({count});
+                res.status(200);
             }catch (err){
                 console.log(err);
                 next(err);
@@ -50,7 +50,7 @@ router.route("/:id/count")
                     }
                 });
                 const count = await deleteLike.destroy();
-                res.status(200).json({message: "삭제"});
+                res.status(200);
             }catch (err){
                 console.log(err);
                 next(err);

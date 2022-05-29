@@ -30,7 +30,7 @@ module.exports = class Product extends Sequelize.Model {
                 allowNull: false
             },
             user_id: {
-                type: Sequelize.STRING(30),
+                type: Sequelize.STRING(40),
                 allowNull: false
             },
             img: {

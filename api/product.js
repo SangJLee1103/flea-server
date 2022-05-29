@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { QueryTypes } = require('sequelize');
 
 const User = require('../models/user');
 const Board = require('../models/board');
@@ -11,7 +12,6 @@ const Likes = require('../models/likes');
 const { sequelize } = require('../models/product');
 
 const router = express.Router();
-
 
 fs.readdir('uploads', error => {
     if (error) {
@@ -134,26 +134,26 @@ router.get('/:board_id/all', auth, async (req, res, next) => {
 //하나의 게시글에 있는 상품을 좋아요 순서대로 10개까지 조회하는 API(랭킹 기능)
 router.get('/:board_id/popular', async (req, res, next) => {
     try {
-        const product = await Product.findAll({
-            where: { board_id: req.params.board_id },
-            include: {
-                model: Likes,
-                attributes: [
-                    'Likes.product_id',
-                    [
-                        sequelize.literal(
-                            '(SELECT COUNT(*) FROM Likes WHERE Likes.user_id = Product.name)'
-                        ),
-                        'LikesCount'
-                    ]
-                ],
-            },
-            order: [
-                [sequelize.literal('LikesCount'), 'DESC']
-            ],
-            limit: 10
+
+        const top10 = []
+
+        const data = await sequelize.query(
+            'SELECT l.product_id, p.img, p.board_id, p.selling_price, u.nickname, COUNT(l.product_id) AS likesCount FROM product AS p'+
+            ' INNER JOIN likes AS l on p.id = l.product_id'+
+            ' INNER JOIN user AS u on u.id = p.user_id' +
+            ' WHERE p.id = l.product_id'+
+            ' GROUP BY l.product_id'+
+            ' ORDER BY likesCount DESC LIMIT 10;',{
+            type: QueryTypes.SELECT
         });
-        res.json({product});
+
+        data.forEach( e => {
+            if(e.board_id == req.params.board_id) {
+                top10.push(e);
+            }
+        })
+        console.log(top10)
+        res.status(200).json({data: top10});
     } catch (err) {
         console.log(err);
         next(err);

@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": "Lsj2486512!",
-    "database": "Flea",
+    "database": "fleamarket",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
