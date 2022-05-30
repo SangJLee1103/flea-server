@@ -3,16 +3,17 @@ const express = require('express');
 const Likes = require('../models/likes');
 const User = require('../models/user');
 const Product = require('../models/product');
-const jwt = require('jsonwebtoken');
 const auth = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 
-router.get("/read", async (req, res, next) => {
-        try {
-            const likeAll = await Likes.findAll();
-            res.status(200).json({likeAll});
+// 특정 회원의 좋아요 조회
+router.get("/read", auth, async (req, res, next) => {
+        try {          
+            const user = await User.findOne({where: {id: req.user} });
+            const userLikes = await Likes.findAll({where: { user_id: user.id }});
+            res.status(200).json({userLikes});
         }catch (err){
             console.log(err);
             next(err);
