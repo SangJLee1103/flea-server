@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/authMiddleware');
 const { count } = require('../models/user');
+const Product = require('../models/product');
 
 const router = express.Router();
 
@@ -114,9 +115,14 @@ router.get('/info', auth, async(req, res, next) => {
     try {
         const userInfo = await User.findAll({
             where: {id: req.user},
-            include: {
-                model: Board
-            }
+            include: [
+                {
+                    model: Board
+                },
+                {
+                    model: Product
+                }
+            ]
         });
     res.status(200).json({list: userInfo});    
     } catch (err) {

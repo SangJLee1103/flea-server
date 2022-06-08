@@ -39,8 +39,8 @@ const upload = multer({
 router.post('/:id/register', auth, upload.array('img', 5),
     async (req, res, next) => {
         try {
-            const user = await User.findOne({ where: { id: req.user } }); //로그인 한 회원 찾기
-            const board = await Board.findOne({ where: { id: req.params.id } });
+            const user = await User.findOne({ where: { id: req.user } }); // 로그인 한 회원 찾기
+            const board = await Board.findOne({ where: { id: req.params.id } }); // 해당 게시글 찾기
             const image = req.files;
             const path = image.map(img => img.path);
 
@@ -51,7 +51,7 @@ router.post('/:id/register', auth, upload.array('img', 5),
                 description: req.body.description,
                 board_id: board.id,
                 user_id: user.id,
-                img: path.toString() //이미지 경로 배열을 문자열로 변환
+                img: path.toString() // 이미지 경로 배열을 문자열로 변환
             });
             res.status(201).json({ message: "상품 등록 완료되었습니다.📚" });
         } catch (err) {
@@ -69,13 +69,12 @@ router.route('/:id')
 
                 const image = req.files;
                 const path = image.map(img => img.path);
-                const toModifiedProduct = await Product.findOne({ where: { id: product.id } });
+                // const toModifiedProduct = await Product.findOne({ where: { id: product.id } });
 
-                await toModifiedProduct.update({
+                await product.update({
                     name: req.body.name,
                     cost_price: req.body.cost_price,
                     selling_price: req.body.selling_price,
-                    like_count: 0,
                     description: req.body.description,
                     img: path.toString() //이미지 경로 배열을 문자열로 변환
                 });
@@ -90,9 +89,7 @@ router.route('/:id')
         async (req, res, next) => {
             try {
                 const product = await Product.findOne({ where: { id: req.params.id } });
-                const toDeletedProduct = await Product.findOne({ where: { id: product.id } });
-
-                await toDeletedProduct.destroy();
+                await product.destroy();
                 res.status(200).json({ message: "상품이 삭제되었습니다.🚮" });
             } catch (err) {
                 console.log(user);
@@ -104,9 +101,8 @@ router.route('/:id')
     .get(auth,
         async (req, res, next) => {
             try {
-                const toFindProduct = await Product.findOne({ where: { id: req.params.id } });
-
-                res.status(200).json({ message: toFindProduct });
+                const product = await Product.findOne({ where: { id: req.params.id } });
+                res.status(200).json({ message: product });
             } catch (err) {
                 console.log(err);
                 next(err);
@@ -143,7 +139,6 @@ router.get('/:board_id/all', auth, async (req, res, next) => {
 //하나의 게시글에 있는 상품을 좋아요 순서대로 10개까지 조회하는 API(랭킹 기능)
 router.get('/:board_id/popular', async (req, res, next) => {
     try {
-
         const top10 = []
 
         const data = await sequelize.query(

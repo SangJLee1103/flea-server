@@ -7,7 +7,6 @@ const auth = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-
 // 특정 회원의 좋아요 조회
 router.get("/read", auth, async (req, res, next) => {
         try {          

@@ -43,6 +43,3 @@ module.exports = class User extends Sequelize.Model {
         db.User.hasMany(db.Product, {foreignKey: 'user_id', sourceKey: 'id', onDelete: 'cascade'});
     }
 };
-
-
-
