@@ -3,13 +3,15 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { QueryTypes } = require('sequelize');
+const auth = require('../middleware/authMiddleware');
+const { validatorErrorChecker } = require('../middleware/validatorMiddleware');
 
 const User = require('../models/user');
 const Board = require('../models/board');
 const Product = require('../models/product');
-const auth = require('../middleware/authMiddleware');
 const Likes = require('../models/likes');
 const { sequelize } = require('../models/product');
+const { body } = require('express-validator');
 
 const router = express.Router();
 
@@ -36,7 +38,12 @@ const upload = multer({
 
 
 //상품 등록 API
-router.post('/:id/register', auth, upload.array('img', 5),
+router.post('/:id/register', auth, upload.array('img', 5), 
+    body("name").notEmpty().withMessage("상품명은 필수입니다."),
+    body("selling_price").notEmpty().withMessage("상품의 판매가격은 필수입니다.").isNumeric().withMessage("판매 가격은 숫자이어야 합니다."),
+    body("cost_price").notEmpty().withMessage("상품의 시가는 필수입니다.").isNumeric().withMessage("시가는 숫자이어야 합니다."),
+    body("description").notEmpty().withMessage("내용은 필수입니다."),
+    validatorErrorChecker,
     async (req, res, next) => {
         try {
             const user = await User.findOne({ where: { id: req.user } }); // 로그인 한 회원 찾기
@@ -46,8 +53,8 @@ router.post('/:id/register', auth, upload.array('img', 5),
 
             await Product.create({
                 name: req.body.name,
-                cost_price: req.body.cost_price,
                 selling_price: req.body.selling_price,
+                cost_price: req.body.cost_price,
                 description: req.body.description,
                 board_id: board.id,
                 user_id: user.id,
@@ -62,7 +69,12 @@ router.post('/:id/register', auth, upload.array('img', 5),
 
 //상품 수정, 삭제, 조회 API
 router.route('/:id')
-    .put(auth, upload.array('img', 5),
+    .put(
+        body("name").notEmpty().withMessage("제목은 필수입니다."),
+        body("selling_price").notEmpty().withMessage("상품의 판매가격은 필수입니다.").isNumeric().withMessage("판매 가격은 숫자이어야 합니다."),
+    body("cost_price").notEmpty().withMessage("상품의 시가는 필수입니다.").isNumeric().withMessage("시가는 숫자이어야 합니다."),
+        body("description").notEmpty().withMessage("내용은 필수입니다."),
+        validatorErrorChecker,  auth, upload.array('img', 5),
         async (req, res, next) => {
             try {
                 const product = await Product.findOne({ where: { id: req.params.id } });
@@ -73,8 +85,8 @@ router.route('/:id')
 
                 await product.update({
                     name: req.body.name,
-                    cost_price: req.body.cost_price,
                     selling_price: req.body.selling_price,
+                    cost_price: req.body.cost_price,
                     description: req.body.description,
                     img: path.toString() //이미지 경로 배열을 문자열로 변환
                 });
@@ -88,11 +100,9 @@ router.route('/:id')
     .delete(auth,
         async (req, res, next) => {
             try {
-                const product = await Product.findOne({ where: { id: req.params.id } });
-                await product.destroy();
+                const product = await Product.destroy({ where: { id: req.params.id } });
                 res.status(200).json({ message: "상품이 삭제되었습니다.🚮" });
             } catch (err) {
-                console.log(user);
                 console.log(err);
                 next(err);
             }
@@ -101,8 +111,15 @@ router.route('/:id')
     .get(auth,
         async (req, res, next) => {
             try {
-                const product = await Product.findOne({ where: { id: req.params.id } });
-                res.status(200).json({ message: product });
+                const product = await Product.findOne({ 
+                    where: { id: req.params.id },
+                    include: {
+                        model: Likes,
+                        attributes: ['user_id']
+                    }
+                    
+                });
+                res.status(200).json({ data: product });
             } catch (err) {
                 console.log(err);
                 next(err);
@@ -156,7 +173,6 @@ router.get('/:board_id/popular', async (req, res, next) => {
                 top10.push(e);
             }
         })
-        console.log(top10)
         res.status(200).json({data: top10});
     } catch (err) {
         console.log(err);

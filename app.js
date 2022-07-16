@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const bodyParser = require('body-parser');
 
 require('dotenv').config();
 
@@ -27,6 +28,7 @@ sequelize.sync({ force: false })
 
 app.use(
     morgan('dev'), //요청이 왔을 때 log를 찍어줌
+    bodyParser.json(),
     express.json(), // json 내용을 분석
     express.urlencoded({extended: false}), //url 파싱
     cookieParser(process.env.SECRET), //쿠키(매개변수로 비밀키)

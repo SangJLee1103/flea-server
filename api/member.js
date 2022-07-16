@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 const auth = require('../middleware/authMiddleware');
 const { count } = require('../models/user');
 const Product = require('../models/product');
+const Like = require('../models/likes');
 
 const router = express.Router();
 
@@ -17,8 +18,8 @@ router.post('/join',
         // 회원가입 데이터 유효성 검증
         body("id").trim().notEmpty().withMessage("공백불가!").isEmail().withMessage("이메일 형식이어야 합니다.").isLength({min:10, max:40}).withMessage("10자 이상 40자 이하로 입력해주세요."),
         body("password").trim().notEmpty().withMessage("공백불가!").matches(/^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/).withMessage("8~20 자리이고 대소문자 또는 특수기호를 최소 1자 이상 사용해주세요."),
-        body("phone").trim().notEmpty().withMessage("공백불가!").isMobilePhone().withMessage("휴대폰 번호 형식이어야합니다.").matches(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/).withMessage("휴대폰 번호 형식이어야합니다."),
         body("nickname").trim().notEmpty().withMessage("공백불가!").isLength({min: 1, max: 30}).withMessage("닉네임은 15자리 이하입니다."),
+        body("phone").trim().notEmpty().withMessage("공백불가!").matches(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/).withMessage("휴대폰 번호 형식이어야합니다."),
         validatorErrorChecker, 
         async (req, res, next) => {
             //회원 중복 체크
@@ -40,14 +41,13 @@ router.post('/join',
                 return;
             }
 
-
             try {
                 const hash = await bcrypt.hash(req.body.password, 12);
                 await User.create({
                     id: req.body.id,
                     password: hash,
-                    phone: req.body.phone,
                     nickname: req.body.nickname,
+                    phone: req.body.phone,
                 });
                 res.status(201).json({message : "회원가입이 완료되었습니다😁"});
             } catch (err) {
@@ -92,7 +92,6 @@ router.post('/login', async(req, res, next) => {
             process.env.JWT_REFRESH_SECRET
         );
         
-        
         //로그인 성공시 응답객체
         res.status(200).json({message: "환영합니다! 😁" + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});;
     }
@@ -120,8 +119,24 @@ router.get('/info', auth, async(req, res, next) => {
                     model: Board
                 },
                 {
-                    model: Product
-                }
+                    model: Product,
+                        include: [{
+                            model: Like,
+                            attributes: ["product_id"]
+                        }]
+                },
+                {
+                    model: Like,
+                    attributes: ["product_id"],
+                        include: [{
+                            model: Product,
+                                include: [{
+                                    model: Like,
+                                    attributes: ['product_id'],
+                                }]
+                            }
+                        ]
+                },
             ]
         });
     res.status(200).json({list: userInfo});    
@@ -135,8 +150,8 @@ router.get('/info', auth, async(req, res, next) => {
 // 회원정보 수정
 router.put('/update', auth, 
     body("password").trim().notEmpty().withMessage("공백불가!").matches(/^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/).withMessage("비밀번호는 8~ 20 자리이고 대소문자 또는 특수기호를 최소 1자 이상 사용해야 합니다."),
-    body("phone").trim().notEmpty().withMessage("공백불가!").isMobilePhone().matches(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/).withMessage("휴대폰 번호 형식이어야합니다."),
     body("nickname").trim().notEmpty().withMessage("공백불가!").isLength({min: 1, max: 30}).withMessage("닉네임은 15자리 이하입니다."),
+    body("phone").trim().notEmpty().withMessage("공백불가!").isMobilePhone().matches(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/).withMessage("휴대폰 번호 형식이어야합니다."),
     validatorErrorChecker, async(req, res, next) => {  
         try {
             const userPhoneDuplication = await User.findAll({ where: { phone: req.body.phone }});
@@ -154,8 +169,8 @@ router.put('/update', auth,
             const hash = await bcrypt.hash(req.body.password, 12);
             const result = await User.update({
                 password: hash,
-                phone: req.body.phone,
                 nickname: req.body.nickname,
+                phone: req.body.phone,
             }, 
             {
                 where: { id: req.user },

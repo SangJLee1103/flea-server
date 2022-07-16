@@ -10,16 +10,10 @@ module.exports = class Product extends Sequelize.Model {
             cost_price:{
                 type: Sequelize.INTEGER,
                 allowNull: false,
-                validate:{
-                    isInt: true
-                },
             },
             selling_price:{
                 type: Sequelize.INTEGER,
                 allowNull: false,
-                validate:{
-                    isInt: true
-                },
             },
             description: {
                 type: Sequelize.STRING(400),
@@ -36,7 +30,12 @@ module.exports = class Product extends Sequelize.Model {
             img: {
                 type: Sequelize.STRING(500),
                 allowNull: false
-            }
+            },
+            created_at: {
+                type: Sequelize.DATE,
+                allowNull: false,
+                defaultValue: Sequelize.NOW,
+            },
 
         },{
             sequelize,
@@ -56,6 +55,3 @@ module.exports = class Product extends Sequelize.Model {
         db.Product.belongsTo(db.Board, {foreignKey: 'board_id', targetKey: 'id'});
     }
 };
-
-
-

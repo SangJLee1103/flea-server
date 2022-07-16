@@ -3,26 +3,30 @@ const Sequelize = require('sequelize');
 module.exports = class Board extends Sequelize.Model {
     static init(sequelize){
         return super.init({
-            start: {
-                type: Sequelize.STRING(30),
+            thumbnail: {
+                type: Sequelize.STRING(200),
                 allowNull: false,
             },
-            topic: {
+            topic: {   // 주제
                 type: Sequelize.STRING(100),
-                allowNull: false
+                allowNull: false,
             },
-            description: {
-                type: Sequelize.STRING(400),
-                allowNull: false
+            place: {    // 장소
+                type: Sequelize.STRING(100),
+                allowNull: false,
             },
-            user_id: {
+            start: {   // 날짜
+                type: Sequelize.STRING(100),
+                allowNull: false,
+            },
+            description: {  // 내용
+                type: Sequelize.STRING(300),
+                allowNull: false,
+            },
+            user_id: {  // 올린사람 ID
                 type: Sequelize.STRING(40),
                 allowNull: false,
             },
-            password: {
-                type: Sequelize.STRING(100),
-                allowNull: false,
-            }
         },{
             sequelize,
             timestamps: false,
