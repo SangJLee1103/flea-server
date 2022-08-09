@@ -20,7 +20,6 @@ fs.readdir('uploads', error => {
         console.error('폴더 생성')
         fs.mkdirSync('uploads') //폴더 생성
     }
-
 });
 
 const upload = multer({
@@ -38,7 +37,7 @@ const upload = multer({
 
 
 //상품 등록 API
-router.post('/:id/register', auth, upload.array('img', 5), 
+router.post('/:id/register', auth, upload.array('img', 5),
     body("name").notEmpty().withMessage("상품명은 필수입니다."),
     body("selling_price").notEmpty().withMessage("상품의 판매가격은 필수입니다.").isNumeric().withMessage("판매 가격은 숫자이어야 합니다."),
     body("cost_price").notEmpty().withMessage("상품의 시가는 필수입니다.").isNumeric().withMessage("시가는 숫자이어야 합니다."),
@@ -72,7 +71,7 @@ router.route('/:id')
     .put(
         body("name").notEmpty().withMessage("제목은 필수입니다."),
         body("selling_price").notEmpty().withMessage("상품의 판매가격은 필수입니다.").isNumeric().withMessage("판매 가격은 숫자이어야 합니다."),
-    body("cost_price").notEmpty().withMessage("상품의 시가는 필수입니다.").isNumeric().withMessage("시가는 숫자이어야 합니다."),
+        body("cost_price").notEmpty().withMessage("상품의 시가는 필수입니다.").isNumeric().withMessage("시가는 숫자이어야 합니다."),
         body("description").notEmpty().withMessage("내용은 필수입니다."),
         validatorErrorChecker,  auth, upload.array('img', 5),
         async (req, res, next) => {

@@ -39,12 +39,13 @@ router.post('/write',auth, upload.single('img'),
     body("start").notEmpty().withMessage("날짜는 필수입니다."),
     body("description").isLength({ min: 10, max: 400 }).withMessage("자세한 내용은 10자 이상은 작성해주세요!"),
     validatorErrorChecker,
-
     async (req, res, next) => {
         try {
             const topicDuplication = await Board.findOne({ where: { topic: req.body.topic } });
-            if (topicDuplication) {
-                next("게시글 제목이 이미 존재합니다.");
+            const startDuplication = await Board.findOne({ where: { start: req.body.start } });
+
+            if (topicDuplication && startDuplication) {
+                next("이미 존재하는 플리마켓입니다.");
                 return
             }
 
@@ -53,11 +54,11 @@ router.post('/write',auth, upload.single('img'),
             const path = image.path;
 
             await Board.create({
-                thumbnail: path.toString(),
                 topic: req.body.topic,
                 place: req.body.place,
                 start: req.body.start,
                 description: req.body.description,
+                thumbnail: path.toString(),
                 user_id: findUser.id,
                 password: req.body.password //게시글 작성자에게 허가를 받은 사용자만 판매자가 될 수 있음(ex: 바자회)
             });
@@ -69,7 +70,7 @@ router.post('/write',auth, upload.single('img'),
     }
 );
 
-//로그인한 회원이 올린 게시글 단건 조회, 해당 게시글 수정 API
+//로그인한 회원이 올린 게시글 단건 조회, 해당 게시글 수정, 삭제 API
 router.route('/:user_id/:id')
     .get(auth,
         async (req, res, next) => {
@@ -87,17 +88,23 @@ router.route('/:user_id/:id')
                 next(err);
             }
         })
-    .put(auth,
-        body("place").not().isEmpty().withMessage("장소를 입력해주세요!"),
-        body("start").not().isEmpty().withMessage("날짜를 정해주세요!"),
-        body("topic").isLength({ min: 10, max: 50 }).withMessage("10자 이상 50자 이하로 작성해주세요!"),
-        body("description").isLength({ min: 20, max: 400 }).withMessage("20자 이상 400자 이하로 작성해주세요!"),
+    .put(auth, upload.single('img'),
+        body("topic").notEmpty().withMessage("제목은 필수입니다.").isLength({ min: 5, max: 50 }).withMessage("제목은 10자 이상 50자 이하로 작성해주세요!"),
+        body("place").notEmpty().withMessage("장소는 필수입니다."),
+        body("start").notEmpty().withMessage("날짜는 필수입니다."),
+        body("description").isLength({ min: 10, max: 400 }).withMessage("자세한 내용은 10자 이상은 작성해주세요!"),
         validatorErrorChecker,
         async (req, res, next) => {
             try {
+                const image = req.file;
+                const path = image.path;
+
                 const topicDuplication = await Board.findOne({ where: { topic: req.body.topic } });
-                if (topicDuplication) {
-                    next("게시글 제목이 이미 존재합니다.");
+                const startDuplication = await Board.findOne({ where: { start: req.body.start } });
+                const descriptionDuplication = await Board.findOne({ where: { description: req.body.description } });
+
+                if (topicDuplication && startDuplication && descriptionDuplication) {
+                    next("이미 존재하는 플리마켓입니다.");
                     return
                 }
 
@@ -108,6 +115,7 @@ router.route('/:user_id/:id')
                     start: req.body.start,
                     topic: req.body.topic,
                     description: req.body.description,
+                    thumbnail: path.toString(),
                     user_id: findBoard.user_id,
                     password: req.body.password //게시글 작성자에게 허가를 받은 사용자만 판매자가 될 수 있음(ex: 바자회)
                 });

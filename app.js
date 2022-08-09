@@ -2,16 +2,11 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser')
 
 require('dotenv').config();
 
 const {sequelize} = require('./models');
-// const passport = require('passport');
-// const passportConfig= require('./passport');
-// passportConfig();
-
-// require("./passport/local");
 
 const memberRouter = require('./api/member');
 const boardRouter = require('./api/board');
@@ -42,8 +37,7 @@ app.use(
         },
         name: 'session-cookie'
     }),
-    // passport.initialize(),
-    // passport.session()
+
 );
 
 app.use('/uploads', express.static('uploads'));
