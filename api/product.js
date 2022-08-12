@@ -57,7 +57,9 @@ router.post('/:id/register', auth, upload.array('img', 5),
                 description: req.body.description,
                 board_id: board.id,
                 user_id: user.id,
+                created_at: req.body.created_at,
                 img: path.toString() // 이미지 경로 배열을 문자열로 변환
+
             });
             res.status(201).json({ message: "상품 등록 완료되었습니다.📚" });
         } catch (err) {
@@ -87,6 +89,7 @@ router.route('/:id')
                     selling_price: req.body.selling_price,
                     cost_price: req.body.cost_price,
                     description: req.body.description,
+                    created_at: req.body.created_at,
                     img: path.toString() //이미지 경로 배열을 문자열로 변환
                 });
                 res.status(201).json({ message: "상품 정보가 수정되었습니다.🔄" });

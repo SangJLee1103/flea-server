@@ -32,11 +32,9 @@ module.exports = class Product extends Sequelize.Model {
                 allowNull: false
             },
             created_at: {
-                type: Sequelize.DATE,
+                type: Sequelize.STRING(40),
                 allowNull: false,
-                defaultValue: Sequelize.NOW,
             },
-
         },{
             sequelize,
             timestamps: false,
