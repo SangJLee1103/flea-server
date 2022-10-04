@@ -70,12 +70,12 @@ router.post('/:id/register', auth, upload.array('img', 5),
 
 //상품 수정, 삭제, 조회 API
 router.route('/:id')
-    .put(
+    .put( auth, upload.array('img', 5),
         body("name").notEmpty().withMessage("제목은 필수입니다."),
         body("selling_price").notEmpty().withMessage("상품의 판매가격은 필수입니다.").isNumeric().withMessage("판매 가격은 숫자이어야 합니다."),
         body("cost_price").notEmpty().withMessage("상품의 시가는 필수입니다.").isNumeric().withMessage("시가는 숫자이어야 합니다."),
         body("description").notEmpty().withMessage("내용은 필수입니다."),
-        validatorErrorChecker,  auth, upload.array('img', 5),
+        validatorErrorChecker,
         async (req, res, next) => {
             try {
                 const product = await Product.findOne({ where: { id: req.params.id } });
@@ -161,7 +161,7 @@ router.get('/:board_id/popular', async (req, res, next) => {
         const top10 = []
 
         const data = await sequelize.query(
-            'SELECT l.product_id, p.img, p.board_id, p.selling_price, u.nickname, COUNT(l.product_id) AS likesCount FROM product AS p'+
+            'SELECT l.product_id, p.name, p.img, p.board_id, p.selling_price, u.nickname, COUNT(l.product_id) AS likesCount FROM product AS p'+
             ' INNER JOIN likes AS l on p.id = l.product_id'+
             ' INNER JOIN user AS u on u.id = p.user_id' +
             ' WHERE p.id = l.product_id'+
