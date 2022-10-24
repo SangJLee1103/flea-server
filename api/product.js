@@ -41,7 +41,7 @@ router.post('/:id/register', auth, upload.array('img', 5),
     body("name").notEmpty().withMessage("상품명은 필수입니다."),
     body("selling_price").notEmpty().withMessage("상품의 판매가격은 필수입니다.").isNumeric().withMessage("판매 가격은 숫자이어야 합니다."),
     body("cost_price").notEmpty().withMessage("상품의 시가는 필수입니다.").isNumeric().withMessage("시가는 숫자이어야 합니다."),
-    body("description").notEmpty().withMessage("내용은 필수입니다."),
+    body("description").notEmpty().withMessage("상품설명은 필수입니다."),
     validatorErrorChecker,
     async (req, res, next) => {
         try {
@@ -56,6 +56,7 @@ router.post('/:id/register', auth, upload.array('img', 5),
                 cost_price: req.body.cost_price,
                 description: req.body.description,
                 board_id: board.id,
+                board_title: board.topic,
                 user_id: user.id,
                 created_at: req.body.created_at,
                 img: path.toString() // 이미지 경로 배열을 문자열로 변환
@@ -115,11 +116,13 @@ router.route('/:id')
             try {
                 const product = await Product.findOne({ 
                     where: { id: req.params.id },
-                    include: {
+                    include: [{
                         model: Likes,
                         attributes: ['user_id']
-                    }
-                    
+                    }, {
+                        model: Board,
+                        attributes: ['place', 'start']
+                    }]
                 });
                 res.status(200).json({ data: product });
             } catch (err) {

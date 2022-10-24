@@ -40,7 +40,7 @@ module.exports = class Board extends Sequelize.Model {
         });
     }
     static associate(db) {
-        db.Board.hasMany(db.Product, {foreignKey: 'board_id', sourceKey: 'id', onDelete: 'cascade'});
+        db.Board.hasMany(db.Product, {foreignKey: 'board_id', sourceKey: 'id', onDelete: 'cascade'}, {foreignKey: 'board_title', sourceKey: 'topic'});
         db.Board.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id', });
     }
 };

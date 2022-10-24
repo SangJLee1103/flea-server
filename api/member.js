@@ -109,10 +109,10 @@ router.post('/login', async(req, res, next) => {
 //     }
 // });
 
-//회원 정보 불러오기 (회원이 작성한 모든 글들도 조회)
+//회원 정보 불러오기 (회원이 작성한 모든 글, 상품도 조회)
 router.get('/info', auth, async(req, res, next) => {
     try {
-        const userInfo = await User.findAll({
+        const userInfo = await User.findAll({  
             where: {id: req.user},
             include: [
                 {
@@ -122,7 +122,7 @@ router.get('/info', auth, async(req, res, next) => {
                     model: Product,
                         include: [{
                             model: Like,
-                            attributes: ["product_id"]
+                            attributes: ["product_id"],
                         }]
                 },
                 {
@@ -154,6 +154,12 @@ router.put('/update', auth,
     body("phone").trim().notEmpty().withMessage("공백불가!").isMobilePhone().matches(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/).withMessage("휴대폰 번호 형식이어야합니다."),
     validatorErrorChecker, async(req, res, next) => {  
         try {
+            const userIdDuplication = await User.findOne({ where: { id: req.body.id }});
+            if (userIdDuplication) {
+                next('이미 등록된 아이디 혹은 이메일입니다.');
+                return;
+            }
+
             const userPhoneDuplication = await User.findAll({ where: { phone: req.body.phone }});
             if (count(userPhoneDuplication) == 2) {
                 next('이미 등록된 휴대폰 번호입니다.');

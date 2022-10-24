@@ -23,6 +23,10 @@ module.exports = class Product extends Sequelize.Model {
                 type: Sequelize.INTEGER,
                 allowNull: false
             },
+            board_title: {
+                type: Sequelize.STRING(100),
+                allowNull: false
+            },
             user_id: {
                 type: Sequelize.STRING(40),
                 allowNull: false
@@ -48,8 +52,9 @@ module.exports = class Product extends Sequelize.Model {
         });
     }
     static associate(db){
-        db.Product.hasMany(db.Likes, {foreignKey: 'product_id', sourceKey: 'id', onDelete: 'cascade'})
+        db.Product.hasMany(db.Likes, {foreignKey: 'product_id', sourceKey: 'id', onDelete: 'cascade'});
         db.Product.belongsTo(db.User, {foreignKey: 'user_id', targetKey: 'id'});
-        db.Product.belongsTo(db.Board, {foreignKey: 'board_id', targetKey: 'id'});
+        db.Product.belongsTo(db.Board, {foreignKey: 'board_id', targetKey: 'id'}, {foreignKey: 'board_title', targetKey: 'topic'});
+        // db.product.belongsTo(db.Board, {foreignKey: 'board_title', targetKey: 'topic'});
     }
 };
