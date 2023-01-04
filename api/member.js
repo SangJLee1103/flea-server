@@ -25,19 +25,19 @@ router.post('/join',
             //회원 중복 체크
             const userIdDuplication = await User.findOne({ where: { id: req.body.id }});
             if (userIdDuplication) {
-                next('이미 등록된 아이디 혹은 이메일입니다.');
+                next([{ msg: '이미 등록된 아이디 혹은 이메일입니다.' }]);
                 return;
             }
 
             const userNicknameDuplication = await User.findOne({ where: { nickname: req.body.nickname }});
             if (userNicknameDuplication) {
-                next('이미 등록된 닉네임입니다.');
+                next([{ msg:'이미 등록된 닉네임입니다.' }]);
                 return;
             } 
             
             const userPhoneDuplication = await User.findOne({ where: { phone: req.body.phone }});
             if (userPhoneDuplication) {
-                next('이미 등록된 휴대폰 번호입니다.');
+                next([{ msg:'이미 등록된 휴대폰 번호입니다.' }]);
                 return;
             }
 
@@ -49,7 +49,7 @@ router.post('/join',
                     nickname: req.body.nickname,
                     phone: req.body.phone,
                 });
-                res.status(201).json({message : "회원가입이 완료되었습니다😁"});
+                res.status(201).json([{ message : "회원가입이 완료되었습니다😁" }]);
             } catch (err) {
                 console.log(err);
                 next(err);
@@ -96,18 +96,6 @@ router.post('/login', async(req, res, next) => {
         res.status(200).json({message: "환영합니다! 😁" + loginUser.nickname + "님", accessToken: accessToken, refreshToken: refreshToken});;
     }
 );
-
-// //로그아웃
-// router.get('/logout', (req, res, next) => {  
-//     try{
-//         req.logout();
-//         req.session.destroy();
-//         res.redirect('/');
-//     }catch(err){
-//         console.log(err);
-//         next(err);
-//     }
-// });
 
 //회원 정보 불러오기 (회원이 작성한 모든 글, 상품도 조회)
 router.get('/info', auth, async(req, res, next) => {
