@@ -62,7 +62,7 @@ router.post('/:id/register', auth, upload.array('img', 5),
                 img: path.toString() // 이미지 경로 배열을 문자열로 변환
 
             });
-            res.status(201).json({ message: "상품 등록 완료되었습니다.📚" });
+            res.status(201).json({ message: [{ msg: "상품 등록 완료되었습니다.📚" }] });
         } catch (err) {
             console.log(err);
             next(err);
@@ -93,7 +93,7 @@ router.route('/:id')
                     created_at: req.body.created_at,
                     img: path.toString() //이미지 경로 배열을 문자열로 변환
                 });
-                res.status(201).json({ message: "상품 정보가 수정되었습니다.🔄" });
+                res.status(201).json({ message: [{ msg: "상품 정보가 수정되었습니다.🔄" }] });
             } catch (err) {
                 console.log(err);
                 next(err);
@@ -104,7 +104,7 @@ router.route('/:id')
         async (req, res, next) => {
             try {
                 const product = await Product.destroy({ where: { id: req.params.id } });
-                res.status(200).json({ message: "상품이 삭제되었습니다.🚮" });
+                res.status(200).json({ message: [{ msg: "상품이 삭제되었습니다.🚮" }] });
             } catch (err) {
                 console.log(err);
                 next(err);

@@ -25,19 +25,19 @@ router.post('/join',
             //회원 중복 체크
             const userIdDuplication = await User.findOne({ where: { id: req.body.id }});
             if (userIdDuplication) {
-                next([{ msg: '이미 등록된 아이디 혹은 이메일입니다.' }]);
+                next([{ msg: '이미 등록된 아이디 혹은 이메일입니다.', param: 'id' }]);
                 return;
             }
 
             const userNicknameDuplication = await User.findOne({ where: { nickname: req.body.nickname }});
             if (userNicknameDuplication) {
-                next([{ msg:'이미 등록된 닉네임입니다.' }]);
+                next([{ msg:'이미 등록된 닉네임입니다.', param: 'nickname' }]);
                 return;
             } 
             
             const userPhoneDuplication = await User.findOne({ where: { phone: req.body.phone }});
             if (userPhoneDuplication) {
-                next([{ msg:'이미 등록된 휴대폰 번호입니다.' }]);
+                next([{ msg:'이미 등록된 휴대폰 번호입니다.', param: 'phone' }]);
                 return;
             }
 
@@ -49,7 +49,7 @@ router.post('/join',
                     nickname: req.body.nickname,
                     phone: req.body.phone,
                 });
-                res.status(201).json([{ message : "회원가입이 완료되었습니다😁" }]);
+                res.status(201).json({ message: [ { msg : "회원가입이 완료되었습니다😁" }]});
             } catch (err) {
                 console.log(err);
                 next(err);
@@ -100,7 +100,7 @@ router.post('/login', async(req, res, next) => {
 //회원 정보 불러오기 (회원이 작성한 모든 글, 상품도 조회)
 router.get('/info', auth, async(req, res, next) => {
     try {
-        const userInfo = await User.findAll({  
+        const userInfo = await User.findOne({  
             where: {id: req.user},
             include: [
                 {

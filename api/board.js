@@ -45,7 +45,7 @@ router.post('/write',auth, upload.single('img'),
             const startDuplication = await Board.findOne({ where: { start: req.body.start } });
 
             if (topicDuplication && startDuplication) {
-                next("이미 존재하는 플리마켓입니다.");
+                next([{ msg: "이미 존재하는 플리마켓입니다." }]);
                 return
             }
 
@@ -62,7 +62,7 @@ router.post('/write',auth, upload.single('img'),
                 user_id: findUser.id,
                 password: req.body.password //게시글 작성자에게 허가를 받은 사용자만 판매자가 될 수 있음(ex: 바자회)
             });
-            res.status(201).json({ message: "작성 완료되었습니다✍🏻" });
+            res.status(201).json({ message: [{ msg: "작성 완료되었습니다✍🏻" }] });
         } catch (err) {
             console.log(err);
             next(err);
@@ -104,7 +104,7 @@ router.route('/:user_id/:id')
                 const descriptionDuplication = await Board.findOne({ where: { description: req.body.description } });
 
                 if (topicDuplication && startDuplication && descriptionDuplication) {
-                    next("이미 존재하는 플리마켓입니다.");
+                    next([{ msg: "이미 존재하는 플리마켓입니다." }]);
                     return
                 }
 
@@ -119,7 +119,7 @@ router.route('/:user_id/:id')
                     user_id: findBoard.user_id,
                     password: req.body.password //게시글 작성자에게 허가를 받은 사용자만 판매자가 될 수 있음(ex: 바자회)
                 });
-                res.status(201).json({ message: "수정 완료되었습니다.✍🏻" });
+                res.status(201).json({ message: [{ msg: "수정 완료되었습니다✍🏻" }] });
             } catch (err) {
                 console.log(err);
                 next(err);
@@ -132,7 +132,7 @@ router.route('/:user_id/:id')
                 const user = await User.findOne({ where: { id: req.user } }); //로그인 한 회원 찾기
                 const findBoard = await Board.findOne({ where: { user_id: user.id, id: req.params.id } });
                 await findBoard.destroy();
-                res.status(200).json({message: "삭제 완료되었습니다.🗑"})
+                res.status(201).json({ message: [{ msg: "삭제 완료되었습니다🗑" }] });
             } catch (err) {
                 console.log(err);
                 next(err);
